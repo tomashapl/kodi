@@ -1,0 +1,2 @@
+Kodistubs==18.0.0
+typing==3.7.4.3
