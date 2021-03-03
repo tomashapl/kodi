@@ -7,6 +7,12 @@ import xbmc
 import websocket
 
 
+def get_is_playing(ws):
+    is_playing = xbmc.Player().isPlaying()
+    print("is playing {0}".format(is_playing))
+    ws.send(json.dumps({"isPlaying": bool(is_playing)}))
+
+
 def execute_build_in(ws, params):
     print("execute_build_in", params)
     xbmc.executebuiltin(params, True)
@@ -43,6 +49,7 @@ def on_message(ws, message):
     switcher = {
         "execute_build_in": partial(execute_build_in, ws, command_message["params"]),
         "get_playing_stream": partial(get_playing_stream, ws),
+        "get_is_playing": partial(get_is_playing, ws)
     }
 
     call = switcher.get(command_message["command"], lambda: "Invalid command")
@@ -69,8 +76,8 @@ def connect():
                 "id": os.uname()[1],
             }
 
-            address = "wss://lili.psvz.cz/websockets"
-            # address = "ws://localhost:8080"
+            # address = "wss://lili.psvz.cz/websockets"
+            address = "ws://localhost:8080"
 
             ws = websocket.WebSocketApp(
                 address,
