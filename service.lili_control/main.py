@@ -48,7 +48,6 @@ def connect():
                 "secret": "EE71C236BEC72A259BACAB36562FC",
                 "id": os.uname()[1],
             }
-            websocket.enableTrace(True)
             ws = websocket.WebSocketApp(
                 "wss://lili.psvz.cz/websockets",
                 on_open=on_open,
