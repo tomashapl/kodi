@@ -50,7 +50,7 @@ def connect():
             }
             websocket.enableTrace(True)
             ws = websocket.WebSocketApp(
-                "ws://localhost:8080",
+                "wss://lili.psvz.cz/websockets",
                 on_open=on_open,
                 on_message=on_message,
                 on_error=on_error,
