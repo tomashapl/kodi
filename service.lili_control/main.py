@@ -9,7 +9,7 @@ import websocket
 
 def execute_build_in(ws, params):
     print("execute_build_in", params)
-    xbmc.executebuiltin(params, False)
+    xbmc.executebuiltin(params, True)
     ws.send(
         json.dumps(
             {"executed": bool(True), "command": "execute_build_in", "params": params}
