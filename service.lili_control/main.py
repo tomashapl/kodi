@@ -9,13 +9,33 @@ import websocket
 
 def execute_build_in(ws, params):
     print("execute_build_in", params)
-    xbmc.executebuiltin(params)
+    xbmc.executebuiltin(params, False)
+    ws.send(
+        json.dumps(
+            {"executed": bool(True), "command": "execute_build_in", "params": params}
+        )
+    )
 
 
 def get_playing_stream(ws):
     print("get stream")
-    current_stream = xbmc.Player().getPlayingFile()
-    ws.send(json.dumps({"stream": current_stream}))
+    is_playing = xbmc.Player().isPlaying()
+
+    if is_playing:
+        player = xbmc.Player()
+        current_stream = player.getPlayingFile()
+        playing_time = player.getTime()
+        ws.send(
+            json.dumps(
+                {
+                    "isPlaying": bool(True),
+                    "stream": current_stream,
+                    "time": playing_time,
+                }
+            )
+        )
+    else:
+        ws.send(json.dumps({"isPlaying": bool(False)}))
 
 
 def on_message(ws, message):
@@ -48,8 +68,12 @@ def connect():
                 "secret": "EE71C236BEC72A259BACAB36562FC",
                 "id": os.uname()[1],
             }
+
+            address = "wss://lili.psvz.cz/websockets"
+            # address = "ws://localhost:8080"
+
             ws = websocket.WebSocketApp(
-                "wss://lili.psvz.cz/websockets",
+                address,
                 on_open=on_open,
                 on_message=on_message,
                 on_error=on_error,
