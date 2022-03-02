@@ -4,7 +4,7 @@
        version="1.0.0"
        provider-name="Tomáš Hapl">
   <requires>
-    <import addon="xbmc.python" version="3.6.0"/>
+    <import addon="xbmc.python" version="3.0.0"/>
   </requires>
   <extension point="xbmc.service" library="main.py" />
   <extension point="xbmc.addon.metadata">
