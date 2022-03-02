@@ -16,6 +16,7 @@ def get_line_action(state):
 if __name__ == "__main__":
     monitor = xbmc.Monitor()
 
+
     process = Popen(
         "tvservice -M 2>&1",
         shell=True,

@@ -60,7 +60,7 @@ def on_error(ws, error):
     print(error)
 
 
-def on_close(ws):
+def on_close(ws, close_status_code, close_msg):
     print("### closed ###")
 
 
@@ -76,8 +76,8 @@ def connect():
                 "id": os.uname()[1],
             }
 
-            # address = "wss://lili.psvz.cz/websockets"
-            address = "ws://localhost:8080"
+            address = "wss://lili.psvz.cz/websockets"
+            #address = "ws://localhost:8080"
 
             ws = websocket.WebSocketApp(
                 address,
