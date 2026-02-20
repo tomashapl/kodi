@@ -3,5 +3,6 @@
     <category label="General">
         <setting type="select" label="Warmup interval" id="warmup.interval"
                  values="30 min|1 hour|2 hours|4 hours" default="2 hours"/>
+        <setting type="action" label="Run warmup now" action="RunScript(service.sc.cachewarmup)"/>
     </category>
 </settings>
