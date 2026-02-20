@@ -193,8 +193,11 @@ def run_warmup():
         cache_key = f'{addon_ver}{url}{params}'
         data = fetch_endpoint(ep, params, headers)
         if data and store_in_cache(cache_key, data, interval):
-            items = len(data.get('menu', []))
-            log(f'{ep} -> OK ({items} items)')
+            if isinstance(data, dict):
+                items = len(data.get('menu', []))
+                log(f'{ep} -> OK ({items} items)')
+            else:
+                log(f'{ep} -> OK ({len(data)} entries)')
             cached += 1
         elif data is None:
             pass  # error already logged
