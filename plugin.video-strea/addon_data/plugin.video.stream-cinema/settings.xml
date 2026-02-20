@@ -1,0 +1,57 @@
+<settings version="2">
+    <setting id="kraska.user">pavelhapl</setting>
+    <setting id="kraska.pass">aw22he77</setting>
+    <setting id="kraska.days.left">212</setting>
+    <setting id="kraska.token">0EEsDQ7GaCCY</setting>
+    <setting id="system.uuid">q69y5d9l-bjmr-v9u4-yv8a-ta4k0a9ajikk</setting>
+    <setting id="system.ver">2.5.05+k19</setting>
+    <setting id="system.auth_token">44b260c5960633acc17468d938866de6</setting>
+    <setting id="system.changelog">2.5.05+k19</setting>
+    <setting id="kraska.chsum">adb73c56ddeec78a229b2f5291e0df35</setting>
+    <setting id="plugin.show.genre" default="true">false</setting>
+    <setting id="plugin.show.old.menu">true</setting>
+    <setting id="plugin.show.skip.button" default="true">false</setting>
+    <setting id="stream.all">true</setting>
+    <setting id="stream.dubed.titles" default="true">false</setting>
+    <setting id="stream.dubed" default="true">false</setting>
+    <setting id="stream.autoplay.episode">true</setting>
+    <setting id="stream.exclude.hdr" default="true">false</setting>
+    <setting id="stream.exclude.dolbyvision">true</setting>
+    <setting id="stream.autoselect">true</setting>
+    <setting id="stream.lang1" default="true">CZ</setting>
+    <setting id="stream.lang2" default="true">SK</setting>
+    <setting id="stream.max.bitrate">100</setting>
+    <setting id="stream.max.quality" default="true">4K</setting>
+    <setting id="stream.adv">true</setting>
+    <setting id="stream.adv.exclude.3d">true</setting>
+    <setting id="stream.adv.exclude.hdr" default="true">false</setting>
+    <setting id="stream.adv.prefer.hdr">true</setting>
+    <setting id="stream.adv.whitelist.codec" default="true">hevc|h264|h265|av1|ac3|aac|mp3|dts|eac</setting>
+    <setting id="stream.adv.blacklist.codec" default="true" />
+    <setting id="stream.adv.whitelist.group" default="true" />
+    <setting id="stream.adv.blacklist.group" default="true" />
+    <setting id="stream.adv.whitelist.src" default="true" />
+    <setting id="stream.adv.blacklist.src" default="true" />
+    <setting id="stream.adv.audio.channels">true</setting>
+    <setting id="stream.adv.speedtest">71460523</setting>
+    <setting id="stream.adv.speedtest.asn">197013</setting>
+    <setting id="stream.adv.speedtest.last">1752862846</setting>
+    <setting id="system.next_ep.last_run">1752908854</setting>
+    <setting id="stream.adv.exclude.dolbyvision">true</setting>
+    <setting id="download.path" default="true" />
+    <setting id="androidtv.path" default="true" />
+    <setting id="library.extract.metadata" default="true" />
+    <setting id="movie.library.path" default="true" />
+    <setting id="tvshow.library.path" default="true" />
+    <setting id="parental.control.enabled">true</setting>
+    <setting id="parental.control.start">5</setting>
+    <setting id="parental.control.end">20</setting>
+    <setting id="parental.control.rating">3</setting>
+    <setting id="parental.control.lang1" default="true">CZ</setting>
+    <setting id="parental.control.lang2" default="true">SK</setting>
+    <setting id="parental.control.dubed">true</setting>
+    <setting id="trakt.enabled" default="true">false</setting>
+    <setting id="trakt.user" default="true" />
+    <setting id="trakt.authorization" default="true" />
+    <setting id="system.autoexec" default="true">false</setting>
+</settings>
