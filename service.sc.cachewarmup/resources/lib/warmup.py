@@ -22,10 +22,16 @@ ENDPOINTS = [
     '/',
     '/FMovies',
     '/FMovies/popular',
+    '/FMovies/trending',
+    '/FMovies/latest',
+    '/FMovies/latestd',
+    '/FMovies/lastWatched',
+    '/FMovies/watching',
     '/FTVShows',
     '/FTVShows/popular',
     '/FSeries',
     '/Recommended',
+    '/Filter/facet',
 ]
 
 INTERVAL_MAP = {
