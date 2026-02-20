@@ -6,7 +6,7 @@ import sqlite3
 import time
 import xml.etree.ElementTree as ET
 from urllib.request import Request, urlopen
-from urllib.parse import urlencode
+from urllib.parse import urlencode, urlparse, parse_qs
 
 import xbmc
 import xbmcaddon
@@ -31,6 +31,7 @@ ENDPOINTS = [
     '/FTVShows/popular',
     '/FSeries',
     '/Recommended',
+    '/Recommended?type=0',
     '/Filter/facet',
 ]
 
@@ -189,9 +190,20 @@ def run_warmup():
     interval = get_interval_seconds()
     cached = 0
     for ep in ENDPOINTS:
-        url = BASE_URL + ep
-        cache_key = f'{addon_ver}{url}{params}'
-        data = fetch_endpoint(ep, params, headers)
+        # Parse query params from endpoint URL (e.g. /Recommended?type=0)
+        # and merge them into params, matching SC's Sc.prepare() behavior
+        ep_parsed = urlparse(ep)
+        ep_path = ep_parsed.path
+        ep_query = parse_qs(ep_parsed.query)
+        # Merge: start with default params dict, add endpoint-specific ones
+        merged = dict(params)
+        for k, v in ep_query.items():
+            merged[k] = v[0] if len(v) == 1 else v
+        ep_params = sorted(merged.items(), key=lambda x: x[0])
+
+        url = BASE_URL + ep_path
+        cache_key = f'{addon_ver}{url}{ep_params}'
+        data = fetch_endpoint(ep_path, ep_params, headers)
         if data and store_in_cache(cache_key, data, interval):
             if isinstance(data, dict):
                 items = len(data.get('menu', []))
