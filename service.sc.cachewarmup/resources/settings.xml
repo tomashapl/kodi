@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings>
+    <category label="General">
+        <setting id="warmup.interval" label="Warmup interval" type="enum"
+                 values="30 min|1 hour|2 hours|4 hours"
+                 default="2" lvalues="1800|3600|7200|14400"/>
+    </category>
+</settings>

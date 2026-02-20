@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<addon id="service.sc.cachewarmup"
+       name="SC Cache Warmup"
+       version="1.0.0"
+       provider-name="tomashapl">
+    <requires>
+        <import addon="xbmc.python" version="3.0.0"/>
+    </requires>
+    <extension point="xbmc.service" library="service.py" start="startup"/>
+    <extension point="xbmc.addon.metadata">
+        <summary lang="cs">Předhřívání cache pro Stream Cinema</summary>
+        <summary lang="en">Cache warmup for Stream Cinema</summary>
+        <description lang="cs">Automaticky stahuje API odpovědi Stream Cinema a ukládá je do cache, aby se obsah načítal rychleji.</description>
+        <description lang="en">Automatically fetches Stream Cinema API responses and stores them in cache for faster content loading.</description>
+        <platform>linux</platform>
+    </extension>
+</addon>

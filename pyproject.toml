@@ -1,0 +1,11 @@
+[project]
+name = "kodi"
+version = "0.1.0"
+description = "Kodi addons by tomashapl"
+requires-python = ">=3.11"
+dependencies = []
+
+[dependency-groups]
+dev = [
+    "kodistubs>=21.0.0",
+]

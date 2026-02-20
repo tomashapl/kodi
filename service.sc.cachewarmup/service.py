@@ -1,23 +1,25 @@
-#!/usr/bin/env python3
-"""Stream Cinema cache pre-warming script.
-Fetches API responses and stores them in the addon's SimpleCache SQLite DB."""
+"""SC Cache Warmup – Kodi service addon.
+Periodically fetches Stream Cinema API responses and stores them in the
+addon's SimpleCache SQLite DB so content loads faster.
+"""
 
 import json
 import os
 import sqlite3
-import sys
 import time
 import xml.etree.ElementTree as ET
 from urllib.request import Request, urlopen
 from urllib.parse import urlencode
 
-# --- Config ---
-ADDON_DIR = '/storage/.kodi/addons/plugin.video.stream-cinema'
-SETTINGS_FILE = '/storage/.kodi/userdata/addon_data/plugin.video.stream-cinema/settings.xml'
+import xbmc
+import xbmcaddon
+
+# --- Config (hardcoded for LibreELEC) ---
+SC_ADDON_DIR = '/storage/.kodi/addons/plugin.video.stream-cinema'
+SC_SETTINGS_FILE = '/storage/.kodi/userdata/addon_data/plugin.video.stream-cinema/settings.xml'
 CACHE_DB = '/storage/.kodi/userdata/addon_data/plugin.video.stream-cinema/simplecache.db'
 BASE_URL = 'https://stream-cinema.online/kodi'
 API_VERSION = '2.0'
-CACHE_TTL = 7200  # 2 hours
 
 ENDPOINTS = [
     '/',
@@ -29,21 +31,41 @@ ENDPOINTS = [
     '/Recommended',
 ]
 
+INTERVAL_MAP = ['1800', '3600', '7200', '14400']
+TAG = '[SC Cache Warmup]'
+
+
+def log(msg, level=xbmc.LOGINFO):
+    xbmc.log(f'{TAG} {msg}', level)
+
+
+def get_interval_seconds():
+    """Read the warmup interval from addon settings."""
+    try:
+        addon = xbmcaddon.Addon()
+        idx = int(addon.getSetting('warmup.interval'))
+        return int(INTERVAL_MAP[idx])
+    except Exception:
+        return 7200  # default 2 hours
+
+
 def get_addon_version():
-    tree = ET.parse(os.path.join(ADDON_DIR, 'addon.xml'))
+    tree = ET.parse(os.path.join(SC_ADDON_DIR, 'addon.xml'))
     return tree.getroot().attrib['version']
 
-def get_settings():
+
+def get_sc_settings():
     settings = {}
     try:
-        tree = ET.parse(SETTINGS_FILE)
+        tree = ET.parse(SC_SETTINGS_FILE)
         for s in tree.findall('.//setting'):
             sid = s.get('id')
             val = s.text if s.text else s.get('value', '')
             settings[sid] = val
     except Exception as e:
-        print(f'  Error reading settings: {e}')
+        log(f'Error reading SC settings: {e}', xbmc.LOGWARNING)
     return settings
+
 
 def build_params(settings):
     params = []
@@ -62,6 +84,7 @@ def build_params(settings):
     params.append(('ver', API_VERSION))
     return sorted(params, key=lambda x: x[0])
 
+
 def fetch_endpoint(path, params, headers):
     url = BASE_URL + path + '?' + urlencode(params)
     try:
@@ -69,11 +92,12 @@ def fetch_endpoint(path, params, headers):
         with urlopen(req, timeout=15) as resp:
             return json.loads(resp.read().decode())
     except Exception as e:
-        print(f'Error ({e})')
+        log(f'Fetch error for {path}: {e}', xbmc.LOGWARNING)
         return None
 
-def store_in_cache(cache_key, data):
-    expires = int(time.time()) + CACHE_TTL
+
+def store_in_cache(cache_key, data, ttl):
+    expires = int(time.time()) + ttl
     try:
         conn = sqlite3.connect(CACHE_DB, timeout=30)
         conn.execute(
@@ -86,33 +110,60 @@ def store_in_cache(cache_key, data):
         conn.close()
         return True
     except Exception as e:
-        print(f'DB error ({e})')
+        log(f'DB error: {e}', xbmc.LOGWARNING)
         return False
 
-def main():
-    print(f'[{time.strftime("%H:%M:%S")}] SC Cache Warmup')
-    addon_ver = get_addon_version()
-    settings = get_settings()
+
+def run_warmup():
+    """Execute one warmup cycle across all endpoints."""
+    log('Starting warmup cycle')
+    try:
+        addon_ver = get_addon_version()
+    except Exception as e:
+        log(f'Cannot read SC addon version: {e}', xbmc.LOGERROR)
+        return
+
+    settings = get_sc_settings()
     params = build_params(settings)
     headers = {
         'User-Agent': 'Kodi/21.3 (Linux; LibreELEC)',
         'X-Uuid': settings.get('system.uuid', ''),
         'X-AUTH-TOKEN': settings.get('system.auth_token', ''),
     }
+
+    interval = get_interval_seconds()
     cached = 0
     for ep in ENDPOINTS:
         url = BASE_URL + ep
         cache_key = f'{addon_ver}{url}{params}'
-        print(f'  {ep}... ', end='', flush=True)
         data = fetch_endpoint(ep, params, headers)
-        if data and store_in_cache(cache_key, data):
-            print(f'OK ({len(data.get("menu", []))} items)')
+        if data and store_in_cache(cache_key, data, interval):
+            items = len(data.get('menu', []))
+            log(f'{ep} -> OK ({items} items)')
             cached += 1
         elif data is None:
-            pass  # error already printed
+            pass  # error already logged
         else:
-            print('DB fail')
-    print(f'[{time.strftime("%H:%M:%S")}] Done: {cached}/{len(ENDPOINTS)}')
+            log(f'{ep} -> DB write failed', xbmc.LOGWARNING)
+
+    log(f'Warmup done: {cached}/{len(ENDPOINTS)} endpoints cached')
+
+
+def main():
+    monitor = xbmc.Monitor()
+    log('Service started')
+
+    while not monitor.abortRequested():
+        run_warmup()
+
+        interval = get_interval_seconds()
+        log(f'Next warmup in {interval // 60} minutes')
+
+        if monitor.waitForAbort(interval):
+            break
+
+    log('Service stopped')
+
 
 if __name__ == '__main__':
     main()
