@@ -31,7 +31,12 @@ ENDPOINTS = [
     '/Recommended',
 ]
 
-INTERVAL_MAP = ['1800', '3600', '7200', '14400']
+INTERVAL_MAP = {
+    '30 min': 1800,
+    '1 hour': 3600,
+    '2 hours': 7200,
+    '4 hours': 14400,
+}
 TAG = '[SC Cache Warmup]'
 
 
@@ -43,8 +48,8 @@ def get_interval_seconds():
     """Read the warmup interval from addon settings."""
     try:
         addon = xbmcaddon.Addon()
-        idx = int(addon.getSetting('warmup.interval'))
-        return int(INTERVAL_MAP[idx])
+        value = addon.getSetting('warmup.interval')
+        return INTERVAL_MAP.get(value, 7200)
     except Exception:
         return 7200  # default 2 hours
 
