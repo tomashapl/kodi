@@ -75,22 +75,66 @@ def get_sc_settings():
     return settings
 
 
+RATING_MAP = {
+    '0': 0,
+    '1': 6,
+    '2': 12,
+    '3': 15,
+    '4': 18,
+}
+
+
+def _is_parental_control_active(settings):
+    """Replicate SC plugin's parental_control_is_active() logic."""
+    import datetime
+    if settings.get('parental.control.enabled') != 'true':
+        return False
+    now = datetime.datetime.now()
+    try:
+        hour_start = int(settings.get('parental.control.start', '0'))
+        hour_end = int(settings.get('parental.control.end', '0'))
+    except (ValueError, TypeError):
+        return False
+    return hour_start <= now.hour <= hour_end
+
+
 def build_params(settings):
-    params = []
-    params.append(('DV', 0 if settings.get('stream.exclude.dolbyvision') == 'true' else 1))
-    params.append(('HDR', 0 if settings.get('stream.exclude.hdr') == 'true' else 1))
-    if settings.get('stream.dubed') == 'true':
-        params.append(('dub', 1))
+    """Build params matching SC plugin's Sc.default_params() exactly."""
+    params = {}
+
+    params['ver'] = API_VERSION
+    params['uid'] = settings.get('system.uuid', '')
+    params['skin'] = 'skin.nimbus'
+    params['lang'] = 'cs'
+
+    parental_control = _is_parental_control_active(settings)
+
+    # dub: stream.dubed OR (parental_control AND parental.control.dubed)
+    if settings.get('stream.dubed') == 'true' or \
+       (parental_control and settings.get('parental.control.dubed') == 'true'):
+        params['dub'] = 1
+
+    # dub+tit: stream.dubed.titles when parental control is OFF
+    if not parental_control and settings.get('stream.dubed.titles') == 'true':
+        params['dub'] = 1
+        params['tit'] = 1
+
+    # m: only when parental control is active
+    if parental_control:
+        rating = settings.get('parental.control.rating', '0')
+        params['m'] = RATING_MAP.get(rating, 0)
+
     if settings.get('plugin.show.genre') == 'true':
-        params.append(('gen', 1))
-    params.append(('lang', 'cs'))
-    params.append(('m', 15))
+        params['gen'] = 1
+
+    params['HDR'] = 0 if settings.get('stream.exclude.hdr') == 'true' else 1
+    params['DV'] = 0 if settings.get('stream.exclude.dolbyvision') == 'true' else 1
+
     if settings.get('plugin.show.old.menu') == 'true':
-        params.append(('old', 1))
-    params.append(('skin', 'skin.nimbus'))
-    params.append(('uid', settings.get('system.uuid', '')))
-    params.append(('ver', API_VERSION))
-    return sorted(params, key=lambda x: x[0])
+        params['old'] = 1
+
+    # Convert to sorted list of tuples (same as SC's Sc.prepare())
+    return sorted(params.items(), key=lambda x: x[0])
 
 
 def fetch_endpoint(path, params, headers):
