@@ -11,7 +11,7 @@ from resources.lib.constants import (
     DEFAULT_API_URL, DEFAULT_ITEMS_PER_PAGE,
 )
 from resources.lib.auth import load_tokens, refresh_tokens, login
-from resources.lib.models import MovieSummary, MovieDetail
+from resources.lib.models import MovieSummary, MovieDetail, StreamItem
 from resources.lib.utils import log
 
 
@@ -73,9 +73,11 @@ class ApiClient:
 
     # --- Movie endpoints ---
 
-    def search_movies(self, page=1):
+    def search_movies(self, query=None, page=1):
         """POST /movie/search -> paginated MovieGetResponse"""
         params = {'page': page, 'size': self._per_page}
+        if query:
+            params['query'] = query
         data = self._post('/movie/search', params=params)
         movies = [MovieSummary(id=m['id'], title=m['title']) for m in data['items']]
         return movies, data['total'], data['page'], data['pageCount']
@@ -93,9 +95,22 @@ class ApiClient:
         return movies, data['total'], data['page'], data['pageCount']
 
     def get_movie_streams(self, movie_id):
-        """POST /movie/{id}/stream -> list of available streams"""
+        """POST /movie/{id}/stream -> plain list of available streams.
+
+        Response: [{id, video: {codec, quality}, audio: {codec, channels, language}}, ...]
+        """
         data = self._post(f'/movie/{movie_id}/stream')
-        return [MovieSummary(id=s['id'], title=s['title']) for s in data['items']]
+        return [
+            StreamItem(
+                id=str(s['id']),
+                video_codec=(s.get('video') or {}).get('codec') or '',
+                video_quality=(s.get('video') or {}).get('quality') or '',
+                audio_codec=(s.get('audio') or {}).get('codec') or '',
+                audio_channels=(s.get('audio') or {}).get('channels') or 0,
+                audio_language=(s.get('audio') or {}).get('language') or '',
+            )
+            for s in data
+        ]
 
     def get_stream_play(self, stream_id):
         """GET /stream/{id}/play -> StreamPlayResponse {link: str|null}"""

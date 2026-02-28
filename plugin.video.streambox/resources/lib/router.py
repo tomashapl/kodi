@@ -160,7 +160,7 @@ class Router:
         if len(streams) == 1:
             selected = 0
         else:
-            labels = [s.title for s in streams]
+            labels = [s.label for s in streams]
             selected = xbmcgui.Dialog().select('Vybrat stream', labels)
 
         if selected < 0:
@@ -201,8 +201,7 @@ class Router:
         query = self._params['query']
         page = int(self._params.get('page', 1))
 
-        # Use the general search endpoint
-        movies, total, current_page, total_pages = self._api.search_movies(page=page)
+        movies, total, current_page, total_pages = self._api.search_movies(query=query, page=page)
 
         xbmcplugin.setContent(self._handle, CONTENT_MOVIES)
         xbmcplugin.setPluginCategory(self._handle, f'Hledani: {query}')
