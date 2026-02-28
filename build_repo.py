@@ -19,6 +19,7 @@ OUTPUT_DIR = os.path.join(SCRIPT_DIR, 'repo')
 ADDON_DIRS = [
     'repository.tomashapl',
     'service.sc.cachewarmup',
+    'plugin.video.streambox',
 ]
 
 

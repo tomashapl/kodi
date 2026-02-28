@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings>
+    <category label="Ucet / Account">
+        <setting type="text" label="Email" id="auth.email" default=""/>
+        <setting type="text" label="Heslo / Password" id="auth.password" option="hidden" default=""/>
+    </category>
+    <category label="Pripojeni / Connection">
+        <setting type="text" label="API URL" id="api.base_url"
+                 default="https://streambox-api.onrender.com"/>
+    </category>
+    <category label="Obecne / General">
+        <setting type="select" label="Jazyk / Language" id="general.language"
+                 values="cs|en" default="cs"/>
+        <setting type="select" label="Polozek na stranku / Items per page" id="general.items_per_page"
+                 values="10|20|30|50" default="20"/>
+    </category>
+    <category label="Prehravani / Playback">
+        <setting type="select" label="Preferovana kvalita / Preferred quality" id="playback.quality"
+                 values="auto|4k|1080p|720p|480p" default="auto"/>
+    </category>
+</settings>

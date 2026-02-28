@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<addon id="plugin.video.streambox"
+       name="StreamBox"
+       version="0.1.0"
+       provider-name="tomashapl">
+    <requires>
+        <import addon="xbmc.python" version="3.0.0"/>
+    </requires>
+    <extension point="xbmc.python.pluginsource" library="main.py">
+        <provides>video</provides>
+    </extension>
+    <extension point="xbmc.addon.metadata">
+        <summary lang="cs">Filmy ze StreamBox</summary>
+        <summary lang="en">Movies from StreamBox</summary>
+        <description lang="cs">Procházejte a přehrávejte filmy z vlastního StreamBox backendu. Podporuje kategorie, vyhledávání, oblíbené, historii sledování a doporučení.</description>
+        <description lang="en">Browse and play movies from your custom StreamBox backend. Supports categories, search, favorites, watch history, and recommendations.</description>
+        <platform>all</platform>
+    </extension>
+</addon>
