@@ -6,8 +6,8 @@ import xbmcplugin
 from resources.lib.constants import (
     ACTION_HUB, ACTION_MOVIES_MENU, ACTION_SERIES_MENU,
     ACTION_LOGIN, ACTION_LOGOUT,
-    ACTION_CATEGORIES, ACTION_MOVIES, ACTION_MOVIE_DETAIL, ACTION_STREAMS,
-    ACTION_PLAY, ACTION_SEARCH, ACTION_SEARCH_RESULTS, ACTION_FAVORITES,
+    ACTION_CATEGORIES, ACTION_MOVIES, ACTION_MOVIE_DETAIL,
+    ACTION_SEARCH, ACTION_SEARCH_RESULTS, ACTION_FAVORITES,
     ACTION_TOGGLE_FAVORITE, ACTION_HISTORY, ACTION_CLEAR_HISTORY,
     ACTION_RECOMMENDATIONS, ACTION_FILTER, ACTION_FILTER_SELECT,
     CONTENT_MOVIES,
@@ -47,8 +47,6 @@ class Router:
             ACTION_CATEGORIES: self._categories,
             ACTION_MOVIES: self._movies,
             ACTION_MOVIE_DETAIL: self._movie_detail,
-            ACTION_STREAMS: self._streams,
-            ACTION_PLAY: self._play,
             ACTION_SEARCH: self._search,
             ACTION_SEARCH_RESULTS: self._search_results,
             ACTION_FAVORITES: self._favorites,
@@ -149,70 +147,43 @@ class Router:
         xbmcplugin.endOfDirectory(self._handle, succeeded=False)
 
     def _movie_detail(self):
-        """Show movie info and link to streams."""
-        movie_id = self._params['movie_id']
-        movie = self._api.get_movie(movie_id)
-
-        xbmcplugin.setContent(self._handle, CONTENT_MOVIES)
-
-        # Show movie as info item (not playable)
-        li = xbmcgui.ListItem(label=movie.title, offscreen=True)
-        li.setInfo('video', {'title': movie.title, 'mediatype': 'movie'})
-
-        # "Select stream" entry
-        url, li_streams, _ = create_directory_item(
-            'Vybrat stream', self._base_url,
-            action=ACTION_STREAMS, movie_id=movie.id)
-        xbmcplugin.addDirectoryItem(self._handle, url, li_streams, isFolder=True)
-
-        xbmcplugin.endOfDirectory(self._handle)
-
-    def _streams(self):
-        """List available streams for a movie (POST /movie/{id}/stream)."""
+        """Fetch streams, show select dialog, and play chosen stream."""
         movie_id = self._params['movie_id']
         streams = self._api.get_movie_streams(movie_id)
 
         if not streams:
             notify('StreamBox', 'Zadny stream nenalezen',
                    xbmcgui.NOTIFICATION_ERROR)
-            xbmcplugin.endOfDirectory(self._handle, succeeded=False)
             return
 
-        for stream in streams:
-            li = xbmcgui.ListItem(label=stream.title, offscreen=True)
-            li.setProperty('IsPlayable', 'true')
-            li.setInfo('video', {'title': stream.title, 'mediatype': 'movie'})
-            url = build_url(self._base_url,
-                            action=ACTION_PLAY,
-                            stream_id=stream.id,
-                            movie_id=movie_id)
-            xbmcplugin.addDirectoryItem(self._handle, url, li, isFolder=False)
+        # Single stream – play directly, no dialog
+        if len(streams) == 1:
+            selected = 0
+        else:
+            labels = [s.title for s in streams]
+            selected = xbmcgui.Dialog().select('Vybrat stream', labels)
 
-        xbmcplugin.endOfDirectory(self._handle)
+        if selected < 0:
+            return
 
-    def _play(self):
-        """Resolve final playback URL (GET /stream/{id}/play)."""
-        stream_id = self._params['stream_id']
-        movie_id = self._params.get('movie_id')
-
-        link = self._api.get_stream_play(stream_id)
+        stream = streams[selected]
+        link = self._api.get_stream_play(stream.id)
 
         if not link:
             notify('StreamBox', 'Stream neni dostupny',
                    xbmcgui.NOTIFICATION_ERROR)
-            xbmcplugin.setResolvedUrl(self._handle, False, xbmcgui.ListItem())
             return
 
-        li = xbmcgui.ListItem(path=link)
-        xbmcplugin.setResolvedUrl(self._handle, True, li)
-
         # Record in history
-        if movie_id:
-            try:
-                movie = self._api.get_movie(movie_id)
-                add_to_history({'id': movie.id, 'title': movie.title})
-            except Exception:
-                pass
+        try:
+            movie = self._api.get_movie(movie_id)
+            add_to_history({'id': movie.id, 'title': movie.title})
+        except Exception:
+            pass
+
+        # Play
+        li = xbmcgui.ListItem(path=link)
+        xbmc.Player().play(link, li)
 
     # ---- Search ----
 
